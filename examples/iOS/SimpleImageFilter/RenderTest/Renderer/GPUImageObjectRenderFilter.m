@@ -14,16 +14,25 @@ static NSString *const kObjectRenderVertexShader = SHADER_STRING
      attribute vec4 position;
      attribute vec4 inputTextureCoordinate;
      attribute vec4 a_modelTextureCoord;
-     uniform mat4 matrix;
+     attribute vec4 a_modelNormal;
  
-     varying highp vec2 textureCoordinate;
-     varying highp vec2 v_modelCoord;
+     uniform mat4 matrix;
+     uniform vec3 u_lightPos;
+ 
+     varying vec2 textureCoordinate;
+     varying vec2 v_modelCoord;
+     varying vec3 v_normal;
+     varying vec3 v_lightDir;
  
      void main()
     {
-        gl_Position = matrix * position;
+        vec4 pPos = matrix * position;
+        gl_Position = pPos;
         textureCoordinate = inputTextureCoordinate.xy;
+        
         v_modelCoord = a_modelTextureCoord.xy;
+        v_normal = a_modelNormal.xyz;
+        v_lightDir = (pPos/pPos.w).xyz - u_lightPos;
     }
 );
 
@@ -32,6 +41,8 @@ static NSString *const kObjectRenderFragShader = SHADER_STRING
 
      varying highp vec2 textureCoordinate;
      varying highp vec2 v_modelCoord;
+     varying highp vec3 v_normal;
+     varying highp vec3 v_lightDir;
  
      uniform sampler2D inputImageTexture;
      uniform sampler2D modelTexture;
@@ -42,8 +53,19 @@ static NSString *const kObjectRenderFragShader = SHADER_STRING
          if(bg > 0.5) {
              gl_FragColor = texture2D(inputImageTexture, textureCoordinate);
          } else {
-             //gl_FragColor = texture2D(modelTexture, v_modelCoord);
-             gl_FragColor = vec4(0.5, 0.5, 0.5, 1.0);
+             
+             highp vec3 originColor = texture2D(modelTexture, v_modelCoord).rgb;
+             highp vec3 originLight = vec3(0.5, 1.0, 0.3);
+             
+             highp float lightDist = length(v_lightDir);
+             
+             highp vec3 color = (clamp(dot(v_normal, - v_lightDir), 0.0, 1.0) * originLight * originColor)
+                                / (lightDist * lightDist);
+             
+             //gl_FragColor = vec4(color.r, color.g, color.b, 1.0);
+             //gl_FragColor = vec4(0.5, 0.5, 0.5, 1.0);
+             
+             gl_FragColor = texture2D(modelTexture, v_modelCoord);
          }
      }
 );
@@ -58,12 +80,16 @@ static NSString *const kObjectRenderFragShader = SHADER_STRING
     GLuint _matUniform;
     
     GLuint _modelTextureCoordAttr;
+    GLuint _modelNormalAttr;
+    
+    GLuint _lightPosUniform;
 }
 
 - (instancetype)init
 {
     self = [super initWithVertexShaderFromString:kObjectRenderVertexShader
                         fragmentShaderFromString:kObjectRenderFragShader];
+    
     runSynchronouslyOnVideoProcessingQueue(^{
         [self initGLParams];
     });
@@ -79,12 +105,18 @@ static NSString *const kObjectRenderFragShader = SHADER_STRING
     _modelTextureUniform = [filterProgram uniformIndex:@"modelTexture"];
     _matUniform = [filterProgram uniformIndex:@"matrix"];
     _modelTextureCoordAttr = [filterProgram attributeIndex:@"a_modelTextureCoord"];
+    _modelNormalAttr = [filterProgram attributeIndex:@"a_modelNormal"];
+    _lightPosUniform = [filterProgram uniformIndex:@"u_lightPos"];
+    
+    glEnableVertexAttribArray(_modelNormalAttr);
+    glEnableVertexAttribArray(_modelTextureCoordAttr);
+    
 }
 
 - (void)initObjects
 {
     NSMutableArray *objects = [NSMutableArray array];
-    SceneMeshModel *earthModel = [[SceneMeshModel alloc] initWithTexturePath:@"Earth512x256.jpg"];
+    SceneMeshModel *earthModel = [[SceneMeshModel alloc] initWithTexturePath:@"Moon256x128.png"];
     [objects addObject:earthModel];
     _objectList = objects;
 }
@@ -102,14 +134,20 @@ static NSString *const kObjectRenderFragShader = SHADER_STRING
         glBindBuffer(GL_ARRAY_BUFFER, model.vertexBuffer.vboID);
         glVertexAttribPointer(filterPositionAttribute, 3, GL_FLOAT, 0, 0, (GLvoid*)0);
         
-        glEnableVertexAttribArray(_modelTextureCoordAttr);
-        
         glBindBuffer(GL_ARRAY_BUFFER, model.texturePositionBuffer.vboID);
         glVertexAttribPointer(_modelTextureCoordAttr, 2, GL_FLOAT, 0, 0, (GLvoid*)0);
+        
+        glBindBuffer(GL_ARRAY_BUFFER, model.normalBuffer.vboID);
+        glVertexAttribPointer(_modelNormalAttr, 3, GL_FLOAT, 0, 0, (GLvoid*)0);
 
         glUniform1f(_bgUniform, 0.0);
+        glUniform3f(_lightPosUniform, 0.0, 0.0, 0.0);
         
-        glUniformMatrix4fv(_matUniform, 1, 0, GLKMatrix4Identity.m);
+        //glUniformMatrix4fv(_matUniform, 1, 0, GLKMatrix4Identity.m);
+        
+        GLfloat aspect = self.sizeOfFBO.width / self.sizeOfFBO.height;
+        
+        glUniformMatrix4fv(_matUniform, 1, 0, GLKMatrix4MakeFrustum(-aspect, aspect, -1, 1, 0.1, 1000).m);
         
         glDrawArrays(GL_TRIANGLES, 0, model.numOfVerticies);
     }

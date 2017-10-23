@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "VertexBufferObject.h"
+#import <GLKit/GLKit.h>
 
 @interface SceneMeshModel : NSObject
 @property(nonatomic, retain) VertexBufferObject *vertexBuffer;
@@ -16,6 +17,10 @@
 @property(nonatomic, retain) NSString *texturePath;
 @property(nonatomic, retain) GLKTextureInfo *texInfo;
 @property(nonatomic) int numOfVerticies;
+@property(nonatomic, retain) NSArray *childs;
+@property(nonatomic, retain) SceneMeshModel *parent;
+@property(nonatomic) GLKMatrix4 accumulatedMat;
+@property(nonatomic) GLKMatrix4 mat;
 //@property(nonatomic, retain) VertexBufferObject *vertexBuffer;
 - (id)initWithTexturePath:(NSString *)texturePath;
 
