@@ -316,11 +316,11 @@
     
     //    dispatch_semaphore_wait(imageUpdateSemaphore, DISPATCH_TIME_FOREVER);
     
-    if (dispatch_semaphore_wait(imageUpdateSemaphore, DISPATCH_TIME_NOW) != 0)
-    {
-        return NO;
-    }
-    
+//    if (dispatch_semaphore_wait(imageUpdateSemaphore, DISPATCH_TIME_NOW) != 0)
+//    {
+//        return NO;
+//    }
+    NSLog(@"tt");
     runAsynchronouslyOnVideoProcessingQueue(^{        
         for (id<GPUImageInput> currentTarget in targets)
         {

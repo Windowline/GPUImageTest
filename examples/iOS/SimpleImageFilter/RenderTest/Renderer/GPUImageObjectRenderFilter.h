@@ -10,4 +10,8 @@
 
 @interface GPUImageObjectRenderFilter : GPUImageFilter
 
+@property(nonatomic) NSTimeInterval animateInterval;
+@property(nonatomic) int animateRepeatCnt;
+
+- (void)renderObjectsWithAnimationRepeatCount:(int)repeatCnt repeatInterval:(NSTimeInterval)interval;
 @end

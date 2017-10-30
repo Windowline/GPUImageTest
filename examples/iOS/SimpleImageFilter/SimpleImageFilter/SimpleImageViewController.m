@@ -1,7 +1,15 @@
 #import "SimpleImageViewController.h"
 #import "GPUImageObjectRenderFilter.h"
+#define MAX_REPEAT 200
 
 @implementation SimpleImageViewController
+{
+    GPUImagePicture *_source;
+    NSTimer* _timer;
+    NSTimeInterval _alramInterval;
+    GPUImageObjectRenderFilter *_renderer;
+    int _repeatCnt;
+}
 
 - (void)didReceiveMemoryWarning
 {
@@ -27,8 +35,8 @@
     [primaryView addSubview:imageSlider];
     
     [self setupDisplayFiltering];
-    [self setupImageResampling];
-    [self setupImageFilteringToDisk];
+
+    [self startAnimate];
 }
 
 - (void)viewDidUnload
@@ -74,6 +82,17 @@
     [myFilter addTarget:imageView];
 
     [sourcePicture processImage];
+    
+    _source = sourcePicture;
+    _renderer = myFilter;
+}
+
+- (void)processImageFilter
+{
+    _repeatCnt = (_repeatCnt + 1) % MAX_REPEAT;
+    _renderer.animateInterval = _alramInterval;
+    _renderer.animateRepeatCnt = _repeatCnt;
+    [_renderer renderObjectsWithAnimationRepeatCount:_repeatCnt repeatInterval:_alramInterval];
 }
 
 - (void)setupImageFilteringToDisk;
@@ -185,5 +204,26 @@
         return;
     }
 }
+
+
+-(void) finishAnimate
+{
+    if(_timer){
+        [_timer invalidate];
+        _timer = nil;
+    }
+}
+
+-(void)startAnimate
+{
+    _alramInterval = 0.01;
+    _timer = [NSTimer scheduledTimerWithTimeInterval:_alramInterval
+                                              target:self
+                                            selector:@selector(processImageFilter)
+                                            userInfo:nil
+                                             repeats:YES];
+}
+
+
 
 @end

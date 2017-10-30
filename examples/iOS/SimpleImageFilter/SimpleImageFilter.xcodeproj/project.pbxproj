@@ -72,6 +72,7 @@
 		4AAF2C3E1F98498C003B34C6 /* GPUImageObjectRenderFilter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GPUImageObjectRenderFilter.h; sourceTree = "<group>"; };
 		4AAF2C3F1F98498C003B34C6 /* GPUImageObjectRenderFilter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GPUImageObjectRenderFilter.m; sourceTree = "<group>"; };
 		4AAF2C421F986E51003B34C6 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
+		4AFD82931FA4612D008E5395 /* DefualtMesh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DefualtMesh.h; sourceTree = "<group>"; };
 		BCB3C41B16BCA7B7003D26B0 /* Icon-72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-72.png"; path = "../../SharedIcons/Icon-72.png"; sourceTree = "<group>"; };
 		BCB3C41C16BCA7B7003D26B0 /* Icon-72@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-72@2x.png"; path = "../../SharedIcons/Icon-72@2x.png"; sourceTree = "<group>"; };
 		BCB3C41D16BCA7B7003D26B0 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon.png; path = ../../SharedIcons/Icon.png; sourceTree = "<group>"; };
@@ -136,6 +137,7 @@
 			isa = PBXGroup;
 			children = (
 				4AAF2C321F983BE9003B34C6 /* Sphere.h */,
+				4AFD82931FA4612D008E5395 /* DefualtMesh.h */,
 			);
 			path = MeshData;
 			sourceTree = "<group>";
